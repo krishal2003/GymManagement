@@ -146,7 +146,7 @@ const Navbar = () => {
               Contact
             </Link>
 
-            {user ? (
+            {/* {user ? (
               <button
                 className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md text-base font-medium text-center"
                 onClick={() => {
@@ -164,7 +164,7 @@ const Navbar = () => {
               >
                 Login
               </Link>
-            )}
+            )} */}
           </div>
         </div>
       )}
