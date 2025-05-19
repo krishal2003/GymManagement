@@ -80,7 +80,7 @@ const Navbar = () => {
                 variant="default"
                 className="ml-4 bg-gym-primary hover:bg-gym-primary/90"
               >
-                <Link to="/login">Login</Link>
+                {/* <Link to="/login">Login</Link> */}
               </Button>
             )}
           </div>
