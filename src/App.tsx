@@ -33,16 +33,14 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
-                  <Dashboard />
-                
+                <Dashboard />
+
               }
             />
             <Route
               path="/member/:id"
               element={
-                <ProtectedRoute>
-                  <MemberProfile />
-                </ProtectedRoute>
+                <MemberProfile />
               }
             />
 

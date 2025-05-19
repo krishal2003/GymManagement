@@ -5,12 +5,12 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -88,32 +88,6 @@ export default function Dashboard() {
 
   const [attentionOpen, setAttentionOpen] = useState(false);
 
-  // New state to hold the selected card filter
-  const [cardFilter, setCardFilter] = useState<string | null>(null);
-
-  // Helper: Check if membership is expired
-  const isExpired = (expirydate: string) => new Date(expirydate) < new Date();
-
-  // Helper: Days remaining until expiry
-  const getDaysRemaining = (expirydate: string) => {
-    const today = new Date();
-    const expiry = new Date(expirydate);
-    const diffTime = expiry.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 3600 * 24));
-  };
-
-  // Helper: Members expiring within 7 days
-  const getExpiringSoonMembers = () => {
-    const now = new Date();
-    const sevenDaysLater = new Date();
-    sevenDaysLater.setDate(now.getDate() + 7);
-
-    return members.filter((member) => {
-      const expiry = new Date(member.expirydate);
-      return expiry >= now && expiry <= sevenDaysLater;
-    });
-  };
-
   // Fetch members from Supabase
   const fetchMembers = async () => {
     const { data, error } = await supabase.from("members").select("*");
@@ -132,6 +106,26 @@ export default function Dashboard() {
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  const isExpired = (expirydate: string) => new Date(expirydate) < new Date();
+
+  const getDaysRemaining = (expirydate: string) => {
+    const today = new Date();
+    const expiry = new Date(expirydate);
+    const diffTime = expiry.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 3600 * 24));
+  };
+
+  const getExpiringSoonMembers = () => {
+    const now = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(now.getDate() + 7);
+
+    return members.filter((member) => {
+      const expiry = new Date(member.expirydate);
+      return expiry >= now && expiry <= sevenDaysLater;
+    });
+  };
 
   // Delete member from Supabase
   const handleDelete = async (id: string) => {
@@ -262,47 +256,55 @@ export default function Dashboard() {
     }
   };
 
-  // Filtering members based on filters including cardFilter and new Near Expiry filter
+  // Filter for cards (status + membership + near expiry)
+  const [cardFilter, setCardFilter] = useState<string>("");
+
+  // When user clicks card buttons, filter table accordingly
+  const handleCardFilter = (filter: string) => {
+    setCardFilter(filter);
+    // Reset other filters when card filter applied
+    setMembershipFilter("");
+    setStatusFilter("");
+    setSearchTerm("");
+  };
+
   const filteredMembers = Array.isArray(members)
     ? members
       .filter((member) => {
+        // Card filter logic
+        if (cardFilter === "Near Expiry") {
+          const days = getDaysRemaining(member.expirydate);
+          if (days < 0 || days > 7) return false;
+        } else if (cardFilter === "Total Members") {
+          // no filter
+        } else if (cardFilter === "Active Members") {
+          if (isExpired(member.expirydate)) return false;
+        } else if (cardFilter === "Expired Members") {
+          if (!isExpired(member.expirydate)) return false;
+        } else if (
+          ["Basic Members", "Standard Members", "Premium Members"].includes(cardFilter)
+        ) {
+          if (
+            member.membershiptype.toLowerCase() !==
+            cardFilter.split(" ")[0].toLowerCase()
+          )
+            return false;
+        }
+
+        // Then apply the other filters on top of card filter
         const matchesSearch = Object.values(member).some((value) =>
           value
             ?.toString()
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
         );
-
         const matchesMembership =
           !membershipFilter || member.membershiptype === membershipFilter;
-
         const matchesStatus =
           !statusFilter ||
           (statusFilter === "Expired" && isExpired(member.expirydate)) ||
           (statusFilter === "Active" && !isExpired(member.expirydate));
-
-        let matchesCardFilter = true;
-        if (cardFilter) {
-          if (cardFilter === "Total Members") {
-            matchesCardFilter = true; // all members
-          } else if (cardFilter === "Active Members") {
-            matchesCardFilter = !isExpired(member.expirydate);
-          } else if (cardFilter === "Expired Members") {
-            matchesCardFilter = isExpired(member.expirydate);
-          } else if (cardFilter === "Near Expiry") {
-            const daysLeft = getDaysRemaining(member.expirydate);
-            matchesCardFilter = daysLeft > 0 && daysLeft <= 7;
-          } else if (
-            cardFilter === "Basic Members" ||
-            cardFilter === "Standard Members" ||
-            cardFilter === "Premium Members"
-          ) {
-            const type = cardFilter.replace(" Members", "");
-            matchesCardFilter = member.membershiptype === type;
-          }
-        }
-
-        return matchesSearch && matchesMembership && matchesStatus && matchesCardFilter;
+        return matchesSearch && matchesMembership && matchesStatus;
       })
       .sort((a, b) => {
         if (sortByDaysRemaining) {
@@ -342,205 +344,105 @@ export default function Dashboard() {
       <Box sx={{ padding: 3, minHeight: "80vh" }}>
         <Box
           display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={2}
+          flexWrap="wrap"
+          justifyContent="center"
+          alignItems="stretch"
+          mb={4}
+          gap={2}
         >
-          <Typography variant="h4" fontWeight={600}>
-            FitTrack Pro Dashboard
-          </Typography>
+          {[
+            "Active Members",
+            "Expired Members",
+            "Basic Members",
+            "Standard Members",
+            "Premium Members",
+            "Near Expiry",
+            "Total Members",
+
+          ].map((label) => (
+            <Button
+              key={label}
+              variant={cardFilter === label ? "contained" : "outlined"}
+              color="primary"
+              sx={{ minWidth: 120, flexGrow: 1 }}
+              onClick={() => handleCardFilter(label)}
+            >
+              {label}{" "}
+              {(label !== "Near Expiry" && label !== "Total Members") && (
+                <Chip
+                  label={
+                    label === "Active Members"
+                      ? statusCounts.Active
+                      : label === "Expired Members"
+                        ? statusCounts.Expired
+                        : label === "Basic Members"
+                          ? statusCounts.Basic
+                          : label === "Standard Members"
+                            ? statusCounts.Standard
+                            : label === "Premium Members"
+                              ? statusCounts.Premium
+                              : ""
+                  }
+                  color={
+                    label === "Active Members"
+                      ? "success"
+                      : label === "Expired Members"
+                        ? "error"
+                        : "primary"
+                  }
+                  size="small"
+                  sx={{ ml: 1 }}
+                />
+              )}
+              {label === "Near Expiry" && (
+                <Chip
+                  label={getExpiringSoonMembers().length}
+                  color="warning"
+                  size="small"
+                  sx={{ ml: 1 }}
+                />
+              )}
+            </Button>
+          ))}
         </Box>
 
-        {/* Stats Cards */}
-        <Grid container spacing={2} mb={4} justifyContent="center" alignItems="stretch">
-          {[
-            {
-              label: "Total Members",
-              value: statusCounts.Active + statusCounts.Expired,
-              color: "text.primary",
-            },
-            {
-              label: "Active Members",
-              value: statusCounts.Active,
-              color: "success.main",
-            },
-            {
-              label: "Expired Members",
-              value: statusCounts.Expired,
-              color: "error.main",
-            },
-            { label: "Basic Members", value: statusCounts.Basic, color: "primary.main" },
-            {
-              label: "Standard Members",
-              value: statusCounts.Standard,
-              color: "primary.dark",
-            },
-            {
-              label: "Premium Members",
-              value: statusCounts.Premium,
-              color: "secondary.main",
-            },
-            {
-              label: "Near Expiry",
-              value: getExpiringSoonMembers().length,
-              color: "warning.main",
-            },
-          ].map((card) => (
-            <Grid
-              item
-              key={card.label}
-              xs={12}
-              sm={6}
-              md={2}
-              display="flex"
-            >
-              <Card
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  boxShadow: 3,
-                  borderRadius: 2,
-                  minHeight: 120,
-                  width: "100%",
-                  cursor: "pointer",
-                  border: cardFilter === card.label ? '3px solid #1976d2' : 'none', // Highlight border if selected
-                  backgroundColor: cardFilter === card.label ? 'rgba(25, 118, 210, 0.1)' : 'inherit',
-                  userSelect: 'none',
-                }}
-                onClick={() => {
-                  // Toggle filter on clicking the same card
-                  if (cardFilter === card.label) {
-                    setCardFilter(null); // clear filter if same card clicked again
-                  } else {
-                    setCardFilter(card.label);
-                  }
-                }}
-              >
-                <CardContent sx={{ textAlign: "center" }}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    {card.label}
-                  </Typography>
-                  <Typography variant="h4" sx={{ color: card.color, fontWeight: "bold" }}>
-                    {card.value}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Filters and buttons */}
+        {/* Search and filter */}
         <Box
           sx={{
             display: "flex",
             gap: 2,
             justifyContent: "space-between",
-            flexWrap: "nowrap",
+            flexWrap: "wrap",
             mb: 3,
             alignItems: "center",
           }}
         >
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Search for members..."
-              variant="outlined"
-              size="medium"
-              fullWidth
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-
-            />
-          </Grid>
-
-          <Button
+          <TextField
+            label="Search for members..."
             variant="outlined"
-            color="secondary"
-            size="large"
-
-            onClick={() => {
-              setSearchTerm("");
-              setStatusFilter("");
-              setMembershipFilter("");
-              setCardFilter(null); // Clear the card filter on reset
-            }}
-            sx={{ height: "56px", alignSelf: "center" }}
-          >
-            Reset Filters
-          </Button>
-
-          <Grid item xs={12} sm={12} md={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              fullWidth
-              sx={{ height: "56px" }}
-              onClick={() => {
-                setNewMember({
-                  name: "",
-                  email: "",
-                  phone: "",
-                  membershiptype: "",
-                  startdate: "",
-                  expirydate: "",
-                  photo: "",
-                });
-                setEditId(null);
-                setOpen(true);
-              }}
-            >
-              + Add New Member
-            </Button>
-          </Grid>
-
-          <Grid item xs={12} sm={12} md={2}>
-            <Button
-              variant="outlined"
-              color="error"
-              size="large"
-              fullWidth
-              sx={{ height: "56px" }}
-              onClick={() => setAttentionOpen(true)}
-            >
-              Attention
-            </Button>
-          </Grid>
-        </Box>
-
-        {/* Membership and Status Filters */}
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            justifyContent: "flex-start",
-            flexWrap: "nowrap",
-            mb: 3,
-          }}
-        >
-          <FormControl sx={{ minWidth: 160 }} size="medium" fullWidth>
+            size="medium"
+            sx={{ flexGrow: 1, minWidth: 220 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <FormControl sx={{ minWidth: 140 }} size="medium">
             <InputLabel>Status</InputLabel>
             <Select
               value={statusFilter}
               label="Status"
               onChange={(e) => setStatusFilter(e.target.value)}
-              fullWidth
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Active">Active</MenuItem>
               <MenuItem value="Expired">Expired</MenuItem>
             </Select>
           </FormControl>
-
-          <FormControl sx={{ minWidth: 160 }} size="medium" fullWidth>
+          <FormControl sx={{ minWidth: 140 }} size="medium">
             <InputLabel>Membership</InputLabel>
             <Select
               value={membershipFilter}
               label="Membership"
               onChange={(e) => setMembershipFilter(e.target.value)}
-              fullWidth
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Basic">Basic</MenuItem>
@@ -551,9 +453,9 @@ export default function Dashboard() {
         </Box>
 
         {/* Members Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
           <Table>
-            <TableHead>
+            <TableHead >
               <TableRow>
                 <TableCell>Photo</TableCell>
                 <TableCell
@@ -597,10 +499,7 @@ export default function Dashboard() {
                 return (
                   <TableRow key={member.id} hover>
                     <TableCell>
-                      <Link
-                        to={`/member/${member.id}`}
-                        style={{ textDecoration: "none" }}
-                      >
+                      <Link to={`/member/${member.id}`} style={{ textDecoration: "none" }}>
                         {member.photo ? (
                           <Avatar
                             alt={member.name}
@@ -652,10 +551,10 @@ export default function Dashboard() {
                       />
                     </TableCell>
                     <TableCell>
-                      <IconButton color="warning" onClick={() => handleEdit(member)} size="large">
+                      <IconButton color="warning" onClick={() => handleEdit(member)} size="large" aria-label="edit member">
                         <Edit />
                       </IconButton>
-                      <IconButton color="error" onClick={() => handleDelete(member.id)} size="large">
+                      <IconButton color="error" onClick={() => handleDelete(member.id)} size="large" aria-label="delete member">
                         <Delete />
                       </IconButton>
                     </TableCell>
