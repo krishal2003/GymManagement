@@ -1,6 +1,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Box, Grid } from "@mui/material";
 
 const About = () => {
   return (
@@ -86,58 +87,51 @@ const About = () => {
             </div>
           </div>
         </section>
+        < Box sx={{
+          // gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          flexDirection: 'row',
+          mb: 5,
+          p: 2
+        }}>
 
-        {/* Team Section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-12 text-center text-gym-secondary">Our Leadership Team</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Team Member 1 */}
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                    <p className="text-sm font-medium text-gym-secondary">Photo</p>
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">John Smith</h3>
-                <p className="text-gym-primary">CEO & Co-Founder</p>
-              </div>
-
-              {/* Team Member 2 */}
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                    <p className="text-sm font-medium text-gym-secondary">Photo</p>
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Sarah Johnson</h3>
-                <p className="text-gym-primary">CTO & Co-Founder</p>
-              </div>
-
-              {/* Team Member 3 */}
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                    <p className="text-sm font-medium text-gym-secondary">Photo</p>
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Michael Williams</h3>
-                <p className="text-gym-primary">Head of Product</p>
-              </div>
-
-              {/* Team Member 4 */}
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                    <p className="text-sm font-medium text-gym-secondary">Photo</p>
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Lisa Chen</h3>
-                <p className="text-gym-primary">Head of Customer Success</p>
+          {/* Team Section */}
+          <h2 className="text-3xl font-bold mb-12 text-center text-gym-secondary">Our Leadership Team</h2>
+          {/* Team Member 1 */}
+          <div className="text-center">
+            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
+                <p className="text-sm font-medium text-gym-secondary">Photo</p>
               </div>
             </div>
+            <h3 className="text-xl font-semibold">Krishal Basnet</h3>
+            <p className="text-gym-primary">Founder</p>
           </div>
-        </section>
+
+          {/* Team Member 2 */}
+          <div className="text-center">
+            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
+                <p className="text-sm font-medium text-gym-secondary">Photo</p>
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold">Aayush Sharma</h3>
+            <p className="text-gym-primary">Co-Founder</p>
+          </div>
+
+          {/* Team Member 3 */}
+          <div className="text-center">
+            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
+                <p className="text-sm font-medium text-gym-secondary">Photo</p>
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold"> Utkarsh Khadka</h3>
+            <p className="text-gym-primary">Co-Founder</p>
+          </div>
+
+
+        </Box>
+
       </main>
       <Footer />
     </div>
