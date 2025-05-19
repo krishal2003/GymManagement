@@ -424,6 +424,29 @@ export default function Dashboard() {
           ))}
         </Box>
 
+        {/* Add Member Button */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setNewMember({
+                name: "",
+                email: "",
+                phone: "",
+                membershiptype: "",
+                startdate: "",
+                expirydate: "",
+                photo: "",
+              });
+              setEditId(null);
+              setOpen(true);
+            }}
+          >
+            + Add Member
+          </Button>
+        </Box>
+
         {/* Search and filter */}
         <Box
           sx={{
