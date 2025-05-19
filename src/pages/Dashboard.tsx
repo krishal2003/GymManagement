@@ -88,6 +88,32 @@ export default function Dashboard() {
 
   const [attentionOpen, setAttentionOpen] = useState(false);
 
+  // New state to hold the selected card filter
+  const [cardFilter, setCardFilter] = useState<string | null>(null);
+
+  // Helper: Check if membership is expired
+  const isExpired = (expirydate: string) => new Date(expirydate) < new Date();
+
+  // Helper: Days remaining until expiry
+  const getDaysRemaining = (expirydate: string) => {
+    const today = new Date();
+    const expiry = new Date(expirydate);
+    const diffTime = expiry.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 3600 * 24));
+  };
+
+  // Helper: Members expiring within 7 days
+  const getExpiringSoonMembers = () => {
+    const now = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(now.getDate() + 7);
+
+    return members.filter((member) => {
+      const expiry = new Date(member.expirydate);
+      return expiry >= now && expiry <= sevenDaysLater;
+    });
+  };
+
   // Fetch members from Supabase
   const fetchMembers = async () => {
     const { data, error } = await supabase.from("members").select("*");
@@ -106,26 +132,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchMembers();
   }, []);
-
-  const isExpired = (expirydate: string) => new Date(expirydate) < new Date();
-
-  const getDaysRemaining = (expirydate: string) => {
-    const today = new Date();
-    const expiry = new Date(expirydate);
-    const diffTime = expiry.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 3600 * 24));
-  };
-
-  const getExpiringSoonMembers = () => {
-    const now = new Date();
-    const sevenDaysLater = new Date();
-    sevenDaysLater.setDate(now.getDate() + 7);
-
-    return members.filter((member) => {
-      const expiry = new Date(member.expirydate);
-      return expiry >= now && expiry <= sevenDaysLater;
-    });
-  };
 
   // Delete member from Supabase
   const handleDelete = async (id: string) => {
@@ -256,6 +262,7 @@ export default function Dashboard() {
     }
   };
 
+  // Filtering members based on filters including cardFilter and new Near Expiry filter
   const filteredMembers = Array.isArray(members)
     ? members
       .filter((member) => {
@@ -265,13 +272,37 @@ export default function Dashboard() {
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
         );
+
         const matchesMembership =
           !membershipFilter || member.membershiptype === membershipFilter;
+
         const matchesStatus =
           !statusFilter ||
           (statusFilter === "Expired" && isExpired(member.expirydate)) ||
           (statusFilter === "Active" && !isExpired(member.expirydate));
-        return matchesSearch && matchesMembership && matchesStatus;
+
+        let matchesCardFilter = true;
+        if (cardFilter) {
+          if (cardFilter === "Total Members") {
+            matchesCardFilter = true; // all members
+          } else if (cardFilter === "Active Members") {
+            matchesCardFilter = !isExpired(member.expirydate);
+          } else if (cardFilter === "Expired Members") {
+            matchesCardFilter = isExpired(member.expirydate);
+          } else if (cardFilter === "Near Expiry") {
+            const daysLeft = getDaysRemaining(member.expirydate);
+            matchesCardFilter = daysLeft > 0 && daysLeft <= 7;
+          } else if (
+            cardFilter === "Basic Members" ||
+            cardFilter === "Standard Members" ||
+            cardFilter === "Premium Members"
+          ) {
+            const type = cardFilter.replace(" Members", "");
+            matchesCardFilter = member.membershiptype === type;
+          }
+        }
+
+        return matchesSearch && matchesMembership && matchesStatus && matchesCardFilter;
       })
       .sort((a, b) => {
         if (sortByDaysRemaining) {
@@ -349,6 +380,11 @@ export default function Dashboard() {
               value: statusCounts.Premium,
               color: "secondary.main",
             },
+            {
+              label: "Near Expiry",
+              value: getExpiringSoonMembers().length,
+              color: "warning.main",
+            },
           ].map((card) => (
             <Grid
               item
@@ -369,6 +405,18 @@ export default function Dashboard() {
                   borderRadius: 2,
                   minHeight: 120,
                   width: "100%",
+                  cursor: "pointer",
+                  border: cardFilter === card.label ? '3px solid #1976d2' : 'none', // Highlight border if selected
+                  backgroundColor: cardFilter === card.label ? 'rgba(25, 118, 210, 0.1)' : 'inherit',
+                  userSelect: 'none',
+                }}
+                onClick={() => {
+                  // Toggle filter on clicking the same card
+                  if (cardFilter === card.label) {
+                    setCardFilter(null); // clear filter if same card clicked again
+                  } else {
+                    setCardFilter(card.label);
+                  }
                 }}
               >
                 <CardContent sx={{ textAlign: "center" }}>
@@ -416,6 +464,7 @@ export default function Dashboard() {
               setSearchTerm("");
               setStatusFilter("");
               setMembershipFilter("");
+              setCardFilter(null); // Clear the card filter on reset
             }}
             sx={{ height: "56px", alignSelf: "center" }}
           >

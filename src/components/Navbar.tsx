@@ -60,7 +60,12 @@ const Navbar = () => {
             >
               Contact
             </Link>
-
+            <Link
+              to="/dashboard"
+              className="text-gray-700 hover:text-gym-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Dashboard
+            </Link>
             {user ? (
               <Button
                 variant="default"
