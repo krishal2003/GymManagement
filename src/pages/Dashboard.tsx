@@ -88,6 +88,10 @@ export default function Dashboard() {
 
   const [attentionOpen, setAttentionOpen] = useState(false);
 
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 20;
+
   // Fetch members from Supabase
   const fetchMembers = async () => {
     const { data, error } = await supabase.from("members").select("*");
@@ -266,6 +270,7 @@ export default function Dashboard() {
     setMembershipFilter("");
     setStatusFilter("");
     setSearchTerm("");
+    setPage(1); // Reset to page 1 when filter changes
   };
 
   const filteredMembers = Array.isArray(members)
@@ -325,6 +330,20 @@ export default function Dashboard() {
       })
     : [];
 
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+  const paginatedMembers = filteredMembers.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  // Page change handler
+  const handleChangePage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
   const statusCounts = Array.isArray(members)
     ? members.reduce(
       (acc: Record<string, number>, member) => {
@@ -358,7 +377,6 @@ export default function Dashboard() {
             "Premium Members",
             "Near Expiry",
             "Total Members",
-
           ].map((label) => (
             <Button
               key={label}
@@ -494,7 +512,7 @@ export default function Dashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredMembers.map((member) => {
+              {paginatedMembers.map((member) => {
                 const daysRemaining = getDaysRemaining(member.expirydate);
                 return (
                   <TableRow key={member.id} hover>
@@ -564,6 +582,48 @@ export default function Dashboard() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination controls */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 2,
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={() => handleChangePage(page - 1)}
+            disabled={page === 1}
+          >
+            Prev
+          </Button>
+
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <Button
+                key={pageNum}
+                variant={page === pageNum ? "contained" : "outlined"}
+                onClick={() => handleChangePage(pageNum)}
+                size="small"
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
+
+          <Button
+            variant="outlined"
+            onClick={() => handleChangePage(page + 1)}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+        </Box>
 
         {/* Add/Edit Member Dialog */}
         <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
