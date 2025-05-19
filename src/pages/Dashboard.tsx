@@ -41,10 +41,10 @@ import {
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
-import Navbar from "@/components/Navbar"; // Adjust import path if needed
-import Footer from "@/components/Footer"; // Adjust import path if needed
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
-import { supabase } from "../lib/supabaseClient"; // Adjust import path if needed
+import { supabase } from "../lib/supabaseClient";
 
 const theme = createTheme({
   palette: {
@@ -66,9 +66,9 @@ export default function Dashboard() {
     name: "",
     email: "",
     phone: "",
-    membershipType: "",
-    startDate: "",
-    expiryDate: "",
+    membershiptype: "",
+    startdate: "",
+    expirydate: "",
     photo: "",
   });
   const [membershipFilter, setMembershipFilter] = useState("");
@@ -107,11 +107,11 @@ export default function Dashboard() {
     fetchMembers();
   }, []);
 
-  const isExpired = (expiryDate: string) => new Date(expiryDate) < new Date();
+  const isExpired = (expirydate: string) => new Date(expirydate) < new Date();
 
-  const getDaysRemaining = (expiryDate: string) => {
+  const getDaysRemaining = (expirydate: string) => {
     const today = new Date();
-    const expiry = new Date(expiryDate);
+    const expiry = new Date(expirydate);
     const diffTime = expiry.getTime() - today.getTime();
     return Math.ceil(diffTime / (1000 * 3600 * 24));
   };
@@ -122,7 +122,7 @@ export default function Dashboard() {
     sevenDaysLater.setDate(now.getDate() + 7);
 
     return members.filter((member) => {
-      const expiry = new Date(member.expiryDate);
+      const expiry = new Date(member.expirydate);
       return expiry >= now && expiry <= sevenDaysLater;
     });
   };
@@ -213,9 +213,9 @@ export default function Dashboard() {
       name: "",
       email: "",
       phone: "",
-      membershipType: "",
-      startDate: "",
-      expiryDate: "",
+      membershiptype: "",
+      startdate: "",
+      expirydate: "",
       photo: "",
     });
     fetchMembers();
@@ -227,9 +227,9 @@ export default function Dashboard() {
       name: member.name,
       email: member.email,
       phone: member.phone,
-      membershipType: member.membershipType,
-      startDate: member.startDate,
-      expiryDate: member.expiryDate,
+      membershiptype: member.membershiptype,
+      startdate: member.startdate,
+      expirydate: member.expirydate,
       photo: member.photo || "",
     });
     setEditId(member.id);
@@ -266,17 +266,17 @@ export default function Dashboard() {
             .includes(searchTerm.toLowerCase())
         );
         const matchesMembership =
-          !membershipFilter || member.membershipType === membershipFilter;
+          !membershipFilter || member.membershiptype === membershipFilter;
         const matchesStatus =
           !statusFilter ||
-          (statusFilter === "Expired" && isExpired(member.expiryDate)) ||
-          (statusFilter === "Active" && !isExpired(member.expiryDate));
+          (statusFilter === "Expired" && isExpired(member.expirydate)) ||
+          (statusFilter === "Active" && !isExpired(member.expirydate));
         return matchesSearch && matchesMembership && matchesStatus;
       })
       .sort((a, b) => {
         if (sortByDaysRemaining) {
-          const aDays = getDaysRemaining(a.expiryDate);
-          const bDays = getDaysRemaining(b.expiryDate);
+          const aDays = getDaysRemaining(a.expirydate);
+          const bDays = getDaysRemaining(b.expirydate);
           if (sortDirection === "asc") {
             return aDays - bDays;
           } else {
@@ -295,9 +295,9 @@ export default function Dashboard() {
   const statusCounts = Array.isArray(members)
     ? members.reduce(
       (acc: Record<string, number>, member) => {
-        const status = isExpired(member.expiryDate) ? "Expired" : "Active";
+        const status = isExpired(member.expirydate) ? "Expired" : "Active";
         acc[status] = (acc[status] || 0) + 1;
-        acc[member.membershipType] = (acc[member.membershipType] || 0) + 1;
+        acc[member.membershiptype] = (acc[member.membershiptype] || 0) + 1;
         return acc;
       },
       { Expired: 0, Active: 0, Basic: 0, Standard: 0, Premium: 0 }
@@ -434,9 +434,9 @@ export default function Dashboard() {
                   name: "",
                   email: "",
                   phone: "",
-                  membershipType: "",
-                  startDate: "",
-                  expiryDate: "",
+                  membershiptype: "",
+                  startdate: "",
+                  expirydate: "",
                   photo: "",
                 });
                 setEditId(null);
@@ -544,7 +544,7 @@ export default function Dashboard() {
             </TableHead>
             <TableBody>
               {filteredMembers.map((member) => {
-                const daysRemaining = getDaysRemaining(member.expiryDate);
+                const daysRemaining = getDaysRemaining(member.expirydate);
                 return (
                   <TableRow key={member.id} hover>
                     <TableCell>
@@ -575,9 +575,9 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell>{member.phone}</TableCell>
-                    <TableCell>{member.membershipType}</TableCell>
-                    <TableCell>{member.startDate}</TableCell>
-                    <TableCell>{member.expiryDate}</TableCell>
+                    <TableCell>{member.membershiptype}</TableCell>
+                    <TableCell>{member.startdate}</TableCell>
+                    <TableCell>{member.expirydate}</TableCell>
                     <TableCell>
                       {daysRemaining > 0 ? (
                         <Typography
@@ -597,8 +597,8 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={isExpired(member.expiryDate) ? "Expired" : "Active"}
-                        color={isExpired(member.expiryDate) ? "error" : "success"}
+                        label={isExpired(member.expirydate) ? "Expired" : "Active"}
+                        color={isExpired(member.expirydate) ? "error" : "success"}
                         size="small"
                       />
                     </TableCell>
@@ -647,8 +647,8 @@ export default function Dashboard() {
                   <Select
                     labelId="membership-type-label"
                     label="Membership Type"
-                    name="membershipType"
-                    value={newMember.membershipType}
+                    name="membershiptype"
+                    value={newMember.membershiptype}
                     onChange={handleInputChange}
                   >
                     <MenuItem value="Basic">Basic</MenuItem>
@@ -660,22 +660,22 @@ export default function Dashboard() {
               <Grid item xs={6}>
                 <TextField
                   label="Start Date"
-                  name="startDate"
+                  name="startdate"
                   type="date"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
-                  value={newMember.startDate}
+                  value={newMember.startdate}
                   onChange={handleInputChange}
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label="Expiry Date"
-                  name="expiryDate"
+                  name="expirydate"
                   type="date"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
-                  value={newMember.expiryDate}
+                  value={newMember.expirydate}
                   onChange={handleInputChange}
                 />
               </Grid>
@@ -712,7 +712,7 @@ export default function Dashboard() {
                 </TableHead>
                 <TableBody>
                   {getExpiringSoonMembers().map((member) => {
-                    const expiryDate = new Date(member.expiryDate);
+                    const expiryDate = new Date(member.expirydate);
                     const today = new Date();
                     const timeDiff = expiryDate.getTime() - today.getTime();
                     const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -720,8 +720,8 @@ export default function Dashboard() {
                     return (
                       <TableRow key={member.id}>
                         <TableCell>{member.name}</TableCell>
-                        <TableCell>{member.expiryDate}</TableCell>
-                        <TableCell>{member.membershipType}</TableCell>
+                        <TableCell>{member.expirydate}</TableCell>
+                        <TableCell>{member.membershiptype}</TableCell>
                         <TableCell>
                           {daysRemaining > 0 ? (
                             <Typography sx={{ color: "error.main", fontWeight: "bold" }}>

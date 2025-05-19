@@ -1,10 +1,33 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { supabase } from "../lib/supabaseClient"; // adjust path
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  // Listen for auth state changes and get current user
+  useEffect(() => {
+    const session = supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate("/login");
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -37,9 +60,24 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <Button asChild variant="default" className="ml-4 bg-gym-primary hover:bg-gym-primary/90">
-              <Link to="/login">Login</Link>
-            </Button>
+
+            {user ? (
+              <Button
+                variant="default"
+                className="ml-4 bg-red-600 hover:bg-red-700"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button
+                asChild
+                variant="default"
+                className="ml-4 bg-gym-primary hover:bg-gym-primary/90"
+              >
+                <Link to="/login">Login</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -102,13 +140,26 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <Link
-              to="/login"
-              className="bg-gym-primary text-white hover:bg-gym-primary/90 px-3 py-2 rounded-md text-base font-medium text-center"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Login
-            </Link>
+
+            {user ? (
+              <button
+                className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md text-base font-medium text-center"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-gym-primary text-white hover:bg-gym-primary/90 px-3 py-2 rounded-md text-base font-medium text-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}
