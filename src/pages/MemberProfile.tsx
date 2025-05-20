@@ -187,34 +187,9 @@ export default function MemberProfile() {
                                     value={member.phone}
                                     onChange={handleChange} />
                             </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="Membership Type"
-                                    name="membershipType"
-                                    fullWidth
-                                    value={member.membershipType}
-                                    onChange={handleChange} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField
-                                    label="Start Date"
-                                    name="startDate"
-                                    type="date"
-                                    fullWidth
-                                    InputLabelProps={{ shrink: true }}
-                                    value={member.startDate}
-                                    onChange={handleChange} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField
-                                    label="Expiry Date"
-                                    name="expiryDate"
-                                    type="date"
-                                    fullWidth
-                                    InputLabelProps={{ shrink: true }}
-                                    value={member.expiryDate}
-                                    onChange={handleChange} />
-                            </Grid>
+                          
+                           
+                          
                             <Grid container spacing={2} sx={{ mt: 2 }} direction="row">
                                 <Grid item xs={6}>
                                     <Button

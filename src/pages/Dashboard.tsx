@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   BarChart3,
+  Mail,
 } from "lucide-react"
 
 import { supabase } from "../lib/supabaseClient"
@@ -47,6 +48,7 @@ import {
   Tooltip as ChartTooltip,
   Legend,
 } from "chart.js"
+import { userInfo } from "os"
 
 ChartJS.register(ArcElement, ChartTooltip, Legend)
 
@@ -54,6 +56,16 @@ export default function Dashboard() {
   // States
   const [members, setMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [userEmail, setUserEmail] = useState("")
+
+useEffect(() => {
+  const fetchUser = async () => {
+    const { data } = await supabase.auth.getUser()
+    setUserEmail(data?.user?.email || "")
+  }
+
+  fetchUser()
+}, [])
 
   // Filters and UI states
   const [searchTerm, setSearchTerm] = useState("")
@@ -348,7 +360,9 @@ export default function Dashboard() {
           <div className="mb-8 overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
             <div className="px-6 py-5 sm:px-8 sm:py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div className="mb-4 sm:mb-0">
-                <h2 className="text-xl font-bold text-white sm:text-2xl">Welcome back, Admin!</h2>
+<h2 className="text-xl font-bold text-white sm:text-2xl">
+  Welcome back, {userEmail ? userEmail.split("@")[0] : "User"}!
+</h2>
                 <p className="mt-1 text-blue-100">
                   Today is {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </p>
@@ -823,15 +837,57 @@ export default function Dashboard() {
                     placeholder="9876543210" />
                 </div>
 
-                <div>
-                  <Label htmlFor="photo">Photo URL</Label>
-                  <Input
-                    id="photo"
-                    name="photo"
-                    value={newMember.photo}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/photo.jpg" />
-                </div>
+              <div>
+  <Label htmlFor="photo">Upload Photo</Label>
+  <Input
+    id="photo"
+    name="photo"
+    type="file"
+    accept="image/*"
+    onChange={async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("member-photos") // 👈 your bucket name
+        .upload(filePath, file);
+
+      if (uploadError) {
+        toast({
+          title: "Upload failed",
+          description: uploadError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("member-photos")
+        .getPublicUrl(filePath);
+
+      if (data?.publicUrl) {
+        setNewMember((prev) => ({ ...prev, photo: data.publicUrl }));
+        toast({ title: "Photo uploaded successfully!" });
+      }
+    }}
+  />
+
+  {newMember.photo && (
+    <div className="mt-2 flex items-center gap-3">
+      <img
+        src={newMember.photo}
+        alt="Preview"
+        className="h-16 w-16 rounded-full object-cover border shadow"
+      />
+      <p className="text-sm text-muted-foreground">{newMember.photo}</p>
+    </div>
+  )}
+</div>
+
 
                 <div>
                   <Label htmlFor="membershiptype">Membership Type</Label>

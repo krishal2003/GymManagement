@@ -32,14 +32,19 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
+                <ProtectedRoute>
                 <Dashboard />
+                </ProtectedRoute>
               }
             />
 
             <Route
               path="/member/:id"
               element={
+                                <ProtectedRoute>
+
                 <MemberProfile />
+                </ProtectedRoute>
               }
             />
 
