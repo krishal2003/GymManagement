@@ -87,49 +87,58 @@ const About = () => {
             </div>
           </div>
         </section>
-        < Box sx={{
-          // gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-          flexDirection: 'row',
-          mb: 5,
-          p: 2
-        }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1.5fr 1fr" },
+            gap: 4,
+            mb: 5,
+            p: 2,
+            alignItems: "center",
+          }}
+        >
+          <h2 className="text-3xl font-bold mb-12 text-center text-gym-secondary col-span-full">
+            Our Leadership Team
+          </h2>
 
-          {/* Team Section */}
-          <h2 className="text-3xl font-bold mb-12 text-center text-gym-secondary">Our Leadership Team</h2>
-          {/* Team Member 1 */}
+          {/* Co-Founder 1 (left) */}
           <div className="text-center">
-            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                <p className="text-sm font-medium text-gym-secondary">Photo</p>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold">Krishal Basnet</h3>
-            <p className="text-gym-primary">Founder</p>
-          </div>
-
-          {/* Team Member 2 */}
-          <div className="text-center">
-            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                <p className="text-sm font-medium text-gym-secondary">Photo</p>
-              </div>
+            <div className="w-40 h-40 mx-auto rounded-full mb-4 overflow-hidden shadow-lg">
+              <img
+                src="/image1.png"
+                alt="Aayush Sharma"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h3 className="text-xl font-semibold">Aayush Sharma</h3>
             <p className="text-gym-primary">Co-Founder</p>
           </div>
 
-          {/* Team Member 3 */}
+          {/* Founder (center) - bigger size */}
           <div className="text-center">
-            <div className="w-40 h-40 mx-auto bg-gray-300 rounded-full mb-4 overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-gym-primary/20 to-gym-accent/20 flex items-center justify-center">
-                <p className="text-sm font-medium text-gym-secondary">Photo</p>
-              </div>
+            <div className="w-52 h-52 mx-auto rounded-full mb-4 overflow-hidden shadow-lg">
+              <img
+                src="/public/image2.HEIC"
+                alt="Krishal Basnet"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <h3 className="text-xl font-semibold"> Utkarsh Khadka</h3>
-            <p className="text-gym-primary">Co-Founder</p>
+            <h3 className="text-2xl font-bold">Krishal Basnet</h3>
+            <p className="text-gym-primary font-semibold">Founder</p>
           </div>
 
-
+          {/* Co-Founder 2 (right) */}
+          <div className="text-center">
+            <div className="w-40 h-40 mx-auto rounded-full mb-4 overflow-hidden shadow-lg">
+              <img
+                src="/image3.png"
+                alt="Utkarsh Khadka"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <h3 className="text-xl font-semibold">Utkarsh Khadka</h3>
+            <p className="text-gym-primary">Co-Founder</p>
+          </div>
         </Box>
 
       </main>

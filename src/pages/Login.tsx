@@ -62,7 +62,7 @@ export default function AuthForm() {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ maxWidth: 400, mx: "auto", mt: 6, p: 3, boxShadow: 3, borderRadius: 2 }}
+        sx={{ maxWidth: 400, mx: "auto", mt: 6, p: 3, boxShadow: 3, borderRadius: 2, mb: 3 }}
       >
         <Typography variant="h5" textAlign="center" mb={3}>
           {isRegister ? "Register" : "Login"}

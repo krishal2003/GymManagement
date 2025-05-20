@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { supabase } from "../lib/supabaseClient"; // adjust path
+import { supabase } from "../lib/supabaseClient";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Listen for auth state changes and get current user
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
     });
 
@@ -60,12 +59,17 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <Link
-              to="/dashboard"
-              className="text-gray-700 hover:text-gym-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Dashboard
-            </Link>
+
+            {/* Show Dashboard only if user logged in */}
+            {user && (
+              <Link
+                to="/dashboard"
+                className="text-gray-700 hover:text-gym-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Dashboard
+              </Link>
+            )}
+
             {user ? (
               <Button
                 variant="default"
@@ -80,7 +84,7 @@ const Navbar = () => {
                 variant="default"
                 className="ml-4 bg-gym-primary hover:bg-gym-primary/90"
               >
-                {/* <Link to="/login">Login</Link> */}
+                <Link to="/login">Login</Link>
               </Button>
             )}
           </div>
@@ -146,7 +150,18 @@ const Navbar = () => {
               Contact
             </Link>
 
-            {/* {user ? (
+            {/* Show Dashboard only if logged in */}
+            {user && (
+              <Link
+                to="/dashboard"
+                className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+
+            {user ? (
               <button
                 className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md text-base font-medium text-center"
                 onClick={() => {
@@ -164,7 +179,7 @@ const Navbar = () => {
               >
                 Login
               </Link>
-            )} */}
+            )}
           </div>
         </div>
       )}
